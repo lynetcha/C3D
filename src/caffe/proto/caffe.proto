@@ -207,15 +207,32 @@ message LayerParameter {
   optional PowerParameter power_param = 21;
   optional WindowDataParameter window_data_param = 20;
   optional DownSamplingParameter down_sampling_param = 23;
+  
   optional MultiStageMeanfieldParameter multi_stage_meanfield_param = 147;
   optional EltwiseParameter eltwise_param = 110;
   optional InputParameter input_param = 143;
+  optional PythonParameter python_param = 130;
  // The size must be either 0 or equal to the number of bottoms.
   repeated bool propagate_down = 148;
   // DEPRECATED: The layer parameters specified as a V0LayerParameter.
   // This should never be used by any code except to upgrade to the new
   // LayerParameter specification.
   optional V0LayerParameter layer = 1;
+}
+
+
+message PythonParameter {
+  optional string module = 1;
+  optional string layer = 2;
+  // This value is set to the attribute `param_str` of the `PythonLayer` object
+  // in Python before calling the `setup()` method. This could be a number,
+  // string, dictionary in Python dict format, JSON, etc. You may parse this
+  // string in `setup` method and use it in `forward` and `backward`.
+  optional string param_str = 3 [default = ''];
+  // Whether this PythonLayer is shared among worker solvers during data parallelism.
+  // If true, each worker solver sequentially run forward from this layer.
+  // This value should be set true if you are using it as a data layer.
+  optional bool share_in_parallel = 4 [default = false];
 }
 
 message InputParameter {
