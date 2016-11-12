@@ -53,12 +53,27 @@ class Layer {
   // Writes the layer parameter to a protocol buffer
   virtual void ToProto(LayerParameter* param, bool write_diff = false);
 
+  inline bool param_propagate_down(const int param_id) {
+    return (param_propagate_down_.size() > param_id) ?
+        param_propagate_down_[param_id] : false;
+  }
+  /**
+   * @brief Sets whether the layer should compute gradients w.r.t. a
+   *        parameter at a particular index given by param_id.
+   */
+  inline void set_param_propagate_down(const int param_id, const bool value) {
+    if (param_propagate_down_.size() <= param_id) {
+      param_propagate_down_.resize(param_id + 1, true);
+    }
+    param_propagate_down_[param_id] = value;
+  }
  protected:
   // The protobuf that stores the layer parameters
   LayerParameter layer_param_;
   // The vector that stores the parameters as a set of blobs.
   vector<shared_ptr<Blob<Dtype> > > blobs_;
-
+  /** Vector indicating whether to compute the diff of each param blob. */
+  vector<bool> param_propagate_down_;
   // Forward functions: compute the layer output
   // (and loss layers return the loss; other layers return the dummy value 0.)
   virtual Dtype Forward_cpu(const vector<Blob<Dtype>*>& bottom,

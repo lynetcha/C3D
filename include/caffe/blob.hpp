@@ -37,11 +37,11 @@ class Blob {
   inline int count() const {return count_; }
 
   // for backward compatibility
-  inline int offset(const int n){
+  inline int offset(const int n) const{
 	  return offset(n, 0, 0, 0, 0);
   }
   // for backward compatibility
-  inline int offset(const int n, const int c){
+  inline int offset(const int n, const int c) const{
 	  return offset(n, c, 0, 0, 0);
   }
 

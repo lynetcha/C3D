@@ -120,6 +120,20 @@ void caffe_gpu_axpy<double>(const int N, const double alpha, const double* X,
   CUBLAS_CHECK(cublasDaxpy(Caffe::cublas_handle(), N, &alpha, X, 1, Y, 1));
 }
 
+
+template <>
+void caffe_set(const int N, const int alpha, int* Y) {
+  if (alpha == 0) {
+    memset(Y, 0, sizeof(int) * N);
+    return;
+  }
+  for (int i = 0; i < N; ++i) {
+    Y[i] = alpha;
+  }
+}
+
+
+
 template <>
 void caffe_set(const int N, const float alpha, float* Y) {
   if (alpha == 0) {

@@ -1,7 +1,7 @@
 // Copyright 2014 BVLC and contributors.
 
 package caffe;
-
+// Specifies the shape (dimensions) of a Blob.
 message BlobProto {
   optional int32 num = 1 [default = 0];
   optional int32 channels = 2 [default = 0];
@@ -107,6 +107,10 @@ message SolverParameter {
   optional int64 random_seed = 20 [default = -1];
 }
 
+enum Phase {
+   TRAIN = 0;
+   TEST = 1;
+}
 // A message that stores the solver snapshots
 message SolverState {
   optional int32 iter = 1; // The current iteration
@@ -173,6 +177,9 @@ message LayerParameter {
     VIDEO_WITH_VOXEL_TRUTH_DATA = 38;
     VOXEL_CUSTOM_LOSS = 39;
     DOWN_SAMPLING = 40;
+    INPUT = 41;
+    MULTISTAGE_MEANFIELD_3D = 42;
+    ELTWISE = 43;
   }
   optional LayerType type = 5; // the layer type from the enum above
 
@@ -200,13 +207,61 @@ message LayerParameter {
   optional PowerParameter power_param = 21;
   optional WindowDataParameter window_data_param = 20;
   optional DownSamplingParameter down_sampling_param = 23;
-
+  optional MultiStageMeanfieldParameter multi_stage_meanfield_param = 147;
+  optional EltwiseParameter eltwise_param = 110;
+  optional InputParameter input_param = 143;
+ // The size must be either 0 or equal to the number of bottoms.
+  repeated bool propagate_down = 148;
   // DEPRECATED: The layer parameters specified as a V0LayerParameter.
   // This should never be used by any code except to upgrade to the new
   // LayerParameter specification.
   optional V0LayerParameter layer = 1;
 }
 
+message InputParameter {
+  // This layer produces N >= 1 top blob(s) to be assigned manually.
+  // Define N shapes to set a shape for each top.
+  // Define 1 shape to set the same shape for every top.
+  // Define no shape to defer to reshaping manually.
+  optional int32 num = 1 [default = 0];
+  optional int32 channels = 2 [default = 0];
+  optional int32 length = 3 [default = 0];
+  optional int32 height = 4 [default = 0];
+  optional int32 width = 5 [default = 0];
+}
+message EltwiseParameter {
+  enum EltwiseOp {
+    PROD = 0;
+    SUM = 1;
+    MAX = 2;
+  }
+  optional EltwiseOp operation = 1 [default = SUM]; // element-wise operation
+  repeated float coeff = 2; // blob-wise coefficient for SUM operation
+
+  // Whether to use an asymptotically slower (for >2 inputs) but stabler method
+  // of computing the gradient for the PROD operation. (No effect for SUM op.)
+  optional bool stable_prod_grad = 3 [default = true];
+}
+
+// Message that stores parameters used by MultiStageMeanfieldLayer
+message MultiStageMeanfieldParameter {
+    enum Mode {
+      POTTS = 0;
+    }
+    optional Mode compatibility_mode = 1 [default = POTTS];
+    optional float threshold = 2;
+
+    required float theta_alpha = 3 [default = 10.];
+    required float theta_beta = 4 [default = 10.];
+    required float theta_gamma = 5 [default = 10.];
+
+    required uint32 num_iterations = 6 [default = 1];
+    optional float spatial_filter_weight = 7 [default = 1];
+    optional float bilateral_filter_weight = 8 [default = 1];
+
+    optional float forced_spatial_filter_weight = 9;
+    optional float forced_bilateral_filter_weight = 10;
+}
 // Message that stores parameters used by ConcatLayer
 message ConcatParameter {
   // Concat Layer needs to specify the dimension along the concat will happen,

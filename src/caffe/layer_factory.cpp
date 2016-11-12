@@ -19,7 +19,9 @@
 #include "caffe/video_with_voxel_truth_data_layer.hpp"
 #include "caffe/voxel_custom_loss_layer.hpp"
 #include "caffe/down_sampling_layer.hpp"
-
+#include "caffe/input_layer.hpp"
+#include "caffe/multistage_mean_field_layer3D.hpp"
+//#include "caffe/eltwise_layer.hpp"
 using std::string;
 
 namespace caffe {
@@ -113,6 +115,12 @@ Layer<Dtype>* GetLayer(const LayerParameter& param) {
 	return new VoxelCustomLossLayer<Dtype>(param);
   case LayerParameter_LayerType_DOWN_SAMPLING:
 	return new DownSamplingLayer<Dtype>(param);
+  case LayerParameter_LayerType_INPUT:
+	return new InputLayer<Dtype>(param);
+  case LayerParameter_LayerType_MULTISTAGE_MEANFIELD_3D:
+	return new MultiStageMeanfield3DLayer<Dtype>(param);
+  //case LayerParameter_LayerType_ELTWISE:
+	//return new EltwiseLayer<Dtype>(param);
   case LayerParameter_LayerType_NONE:
     LOG(FATAL) << "Layer " << name << " has unspecified type.";
     break;
